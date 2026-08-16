@@ -1,4 +1,4 @@
-from flask import Flask, request, redirect, jsonify, json
+﻿from flask import Flask, request, redirect, jsonify, json
 import time
 import jiosaavn
 import os
@@ -157,6 +157,29 @@ def result():
         return jsonify(error)
     return None
 
+
+
+@app.route("/api/search", methods=["GET"])
+
+def sonic_search():
+
+    query = request.args.get("q", "").strip()
+
+    if not query:
+
+        return jsonify({"value": [], "Count": 0})
+
+    try:
+
+        return jsonify(jiosaavn.search_for_song(query, False, True))
+
+    except Exception as e:
+
+        return jsonify({"value": [], "Count": 0, "error": str(e)}), 500
+
+
+
 if __name__ == '__main__':
     app.debug = True
     app.run(host='0.0.0.0', port=5100, use_reloader=True, threaded=True)
+
