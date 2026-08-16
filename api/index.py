@@ -1,4 +1,18 @@
 ﻿
+import sys
+
+from pathlib import Path
+
+
+
+ROOT = Path(__file__).resolve().parent.parent
+
+if str(ROOT) not in sys.path:
+
+    sys.path.insert(0, str(ROOT))
+
+
+
 from flask import Flask, request, jsonify
 
 from flask_cors import CORS
@@ -13,7 +27,15 @@ CORS(app)
 
 
 
-def search():
+@app.route("/api/index", methods=["GET"])
+
+@app.route("/api/index/", methods=["GET"])
+
+@app.route("/api/result", methods=["GET"])
+
+@app.route("/api/result/", methods=["GET"])
+
+def search_api():
 
     query = request.args.get("query", "").strip()
 
@@ -37,11 +59,11 @@ def search():
 
         return jsonify({
 
-            "error": str(e),
-
             "value": [],
 
-            "Count": 0
+            "Count": 0,
+
+            "error": str(e)
 
         }), 500
 
@@ -49,17 +71,13 @@ def search():
 
 @app.route("/", methods=["GET"])
 
-@app.route("/api", methods=["GET"])
+def health():
 
-@app.route("/api/index", methods=["GET"])
+    return jsonify({
 
-@app.route("/api/index/", methods=["GET"])
+        "status": "ok",
 
-@app.route("/result/", methods=["GET"])
+        "service": "JioSaavnAPI"
 
-@app.route("/api/result/", methods=["GET"])
-
-def api_search():
-
-    return search()
+    })
 
