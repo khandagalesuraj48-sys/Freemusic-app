@@ -1,37 +1,65 @@
 ﻿
-import sys
+from flask import Flask, request, jsonify
 
-from pathlib import Path
+from flask_cors import CORS
 
-
-
-ROOT = Path(__file__).resolve().parent.parent
-
-if str(ROOT) not in sys.path:
-
-    sys.path.insert(0, str(ROOT))
+import jiosaavn
 
 
 
-from app import app
+app = Flask(__name__)
+
+CORS(app)
 
 
 
-_original_wsgi = app.wsgi_app
+def search():
+
+    query = request.args.get("query", "").strip()
+
+    lyrics = request.args.get("lyrics", "false").lower() == "true"
 
 
 
-def vercel_wsgi(environ, start_response):
+    if not query:
 
-    path = environ.get("PATH_INFO", "")
-
-    if path == "/api/index" or path == "/api/index/":
-
-        environ["PATH_INFO"] = "/result/"
-
-    return _original_wsgi(environ, start_response)
+        return jsonify({"value": [], "Count": 0})
 
 
 
-app.wsgi_app = vercel_wsgi
+    try:
+
+        result = jiosaavn.search_for_song(query, lyrics, True)
+
+        return jsonify(result)
+
+    except Exception as e:
+
+        return jsonify({
+
+            "error": str(e),
+
+            "value": [],
+
+            "Count": 0
+
+        }), 500
+
+
+
+@app.route("/", methods=["GET"])
+
+@app.route("/api", methods=["GET"])
+
+@app.route("/api/index", methods=["GET"])
+
+@app.route("/api/index/", methods=["GET"])
+
+@app.route("/result/", methods=["GET"])
+
+@app.route("/api/result/", methods=["GET"])
+
+def api_search():
+
+    return search()
 
